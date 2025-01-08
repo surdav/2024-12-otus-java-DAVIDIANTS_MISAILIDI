@@ -3,7 +3,6 @@
 
 # Log file
 *.log
-spring.log
 
 # BlueJ files
 *.ctxt
@@ -13,6 +12,7 @@ spring.log
 
 # Package Files #
 *.jar
+!gradle-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -20,63 +20,20 @@ spring.log
 *.tar.gz
 *.rar
 
-# Virtual machine crash logs
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-replay_pid*
 
-# IntelliJ IDEA
-.idea/
+# Ignore Gradle project-specific cache directory
+.gradle
+/buildSrc/.gradle/
+
+# Ignore Gradle build output directory
+build
+out
+
+#Idea
 *.iml
 *.iws
 *.ipr
-out/
+*.idea
 
-# Gradle
-.gradle/
-build/
-.gradle-cache/
-gradle-app.setting
-
-# Maven
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-.mvn/
-
-# Spring Boot
-*.tmp
-
-# General
-*.swp
-*~
-*.sublime-project
-*.sublime-workspace
-*.bak
-*.orig
-
-# OS
-.DS_Store
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# IDE-specific
-*.classpath
-*.project
-*.settings/
-*.factorypath
-
-# Temporary files
-*.tmp
-*.bak
-*.swo
-*.err
-*.out
-
-# Miscellaneous
-!.gitkeep
-.env
-*.env
