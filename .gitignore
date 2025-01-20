@@ -28,9 +28,6 @@ hs_err_pid*
 /buildSrc/.gradle/
 gradlew
 gradlew.bat
-settings.gradle.kts
-build.gradle.kts
-**/build.gradle.kts
 
 # Ignore Gradle build output directory
 build
