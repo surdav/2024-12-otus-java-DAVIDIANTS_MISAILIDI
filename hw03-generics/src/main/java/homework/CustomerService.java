@@ -7,7 +7,7 @@ import java.util.TreeMap;
 public class CustomerService {
 
     // важно подобрать подходящую Map-у, посмотрите на редко используемые методы, они тут полезны
-    TreeMap<Customer, String> customers = new TreeMap<>(Comparator.comparingLong(Customer::getScores));
+    private final TreeMap<Customer, String> customers = new TreeMap<>(Comparator.comparingLong(Customer::getScores));
 
     public Map.Entry<Customer, String> getSmallest() {
         // Возможно, чтобы реализовать этот метод, потребуется посмотреть как Map.Entry сделан в jdk
