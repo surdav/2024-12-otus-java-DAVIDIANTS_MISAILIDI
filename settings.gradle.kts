@@ -1,7 +1,11 @@
+// Set root project name
 rootProject.name = "otusJava"
+
+// Include all modules
 include("hw01-gradle")
+include("hw03-generics")
 
-
+// Plugin management for centralized version control of plugins
 pluginManagement {
     val jgitver: String by settings
     val dependencyManagement: String by settings
