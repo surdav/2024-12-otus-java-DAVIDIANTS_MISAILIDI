@@ -4,6 +4,7 @@ rootProject.name = "otusJava"
 // Include all modules
 include("hw01-gradle")
 include("hw03-generics")
+include("hw06-annotations")
 
 // Plugin management for centralized version control of plugins
 pluginManagement {
