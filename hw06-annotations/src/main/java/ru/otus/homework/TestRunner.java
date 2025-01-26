@@ -21,14 +21,25 @@ public class TestRunner {
         // Prevent instantiation
     }
 
-    public static void runTests(Class<?> testClass) {
+    /**
+     * Runs the tests for the given class and returns a TestResult with the test summary.
+     *
+     * @param testClass the class containing the tests
+     * @return a TestResult instance containing the test summary
+     */
+    public static TestResult runTests(Class<?> testClass) {
+
+        // Variables to track test results
+        int passed = 0;
+        int failed = 0;
+
         try {
             // Lists to store methods annotated with @Before, @Test, and @After
             List<Method> beforeMethods = new ArrayList<>();
             List<Method> testMethods = new ArrayList<>();
             List<Method> afterMethods = new ArrayList<>();
 
-            // Analyze methods in the class to find annotations
+            // Analyze methods to identify annotations (@Before, @Test, @After)
             for (Method method : testClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(Before.class)) {
                     beforeMethods.add(method);
@@ -39,11 +50,7 @@ public class TestRunner {
                 }
             }
 
-            // Variables to track test results
-            int passed = 0;
-            int failed = 0;
-
-            // Execute each @Test method
+            // Execute all @Test methods
             for (Method testMethod : testMethods) {
 
                 Object testInstance = testClass.getDeclaredConstructor().newInstance();
@@ -55,16 +62,13 @@ public class TestRunner {
                 }
             }
 
-            // Output the summary of test results
-            logger.info("\n--- Test Summary ---");
-            logger.info("Passed: {}", passed);
-            logger.info("Failed: {}", failed);
-            logger.info("Total: {}", testMethods.size());
-
         } catch (Exception e) {
             // Log error details if the test runner encounters an exception
             logger.error("Error while running tests: ", e);
         }
+
+        int total = passed + failed;
+        return new TestResult(passed, failed, total);
     }
 
     /**
@@ -78,12 +82,12 @@ public class TestRunner {
      */
     private static boolean executeTests(Object testInstance, List<Method> beforeMethods, Method testMethod, List<Method> afterMethods) {
         try {
-            // Execute all @Before methods
+            // Execute all methods annotated with @Before
             for (Method beforeMethod : beforeMethods) {
                 beforeMethod.invoke(testInstance);
             }
 
-            // Execute the @Test method
+            // Execute the method annotated with @Test
             testMethod.invoke(testInstance);
 
             // Log success message
@@ -96,7 +100,7 @@ public class TestRunner {
             return false;
 
         } finally {
-            // Execute all @After methods
+            // Execute all methods annotated with @After
             for (Method afterMethod : afterMethods) {
                 try {
                     afterMethod.invoke(testInstance);
