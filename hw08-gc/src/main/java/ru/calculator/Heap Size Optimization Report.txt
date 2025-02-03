@@ -1,0 +1,32 @@
+Heap Size Optimization Report
+
+Objective:
+Evaluate the impact of heap size on Java application performance and assess the effect of replacing Integer with int.
+
+Methodology:
+- Ran tests with heap sizes from 256MB to 2048MB ( -Xms and -Xmx set equally).
+- Measured execution time before and after optimizing the code by replacing Integer with int.
+
+ Results:
+
+| Heap Size | Time Before Optimization (ms) | Time After Optimization (ms) |
+|-----------|-------------------------------|------------------------------|
+| 256MB     | 66,312 (66 sec)               | 33,488 (33 sec)              |
+| 512MB     | 64,119 (64 sec)               | 35,364 (35 sec)              |
+| 1024MB    | 63,847 (63 sec)               | 33,699 (33 sec)              |
+| 1536MB    | 51,975 (51 sec)               | 34,216 (34 sec)              |
+| 2048MB    | 63,847 (63 sec)               | 34,036 (34 sec)              |
+
+ Analysis:
+- Before optimization: Optimal heap size was 1536MB; increasing it further had no impact on performance.
+- After optimization: No significant performance difference between 256MB and 2048MB, showing that excessive object creation (Integer vs int) was the main issue.
+
+ Conclusions:
+1. Increasing heap beyond 1536MB does not improve performance.
+2. Switching from Integer to int reduced execution time by 30-50%.
+3. Code optimization is more effective than increasing heap size.
+
+ Recommendations:
+✔ Optimize code before tweaking JVM settings.
+✔ Minimize unnecessary object creation (Integer → int).
+✔ Test different memory and GC strategies for better efficiency.
