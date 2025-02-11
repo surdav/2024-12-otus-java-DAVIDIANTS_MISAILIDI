@@ -6,6 +6,7 @@ include("hw01-gradle")
 include("hw03-generics")
 include("hw06-annotations")
 include("hw08-gc")
+include("hw10-byteCodes")
 
 // Plugin management for centralized version control of plugins
 pluginManagement {
