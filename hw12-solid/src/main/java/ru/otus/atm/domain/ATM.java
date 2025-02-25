@@ -68,7 +68,12 @@ public class ATM implements ATMOperations {
         for (var entry : withdrawalPlan.entrySet()) {
             int denom = entry.getKey();
             int used = entry.getValue();
-            cashCells.get(denom).withdraw(used);
+
+            boolean withdraw = cashCells.get(denom).withdraw(used);
+
+            if(!withdraw) {
+                throw new WithdrawalException("Cannot dispense the requested amount: " + amount);
+            }
         }
         return withdrawalPlan;
     }
