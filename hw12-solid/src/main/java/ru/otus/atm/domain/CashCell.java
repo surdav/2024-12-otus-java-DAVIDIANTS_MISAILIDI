@@ -35,7 +35,7 @@ public class CashCell {
      */
     public boolean withdraw(int number) {
         if (number <= 0) {
-            throw new IllegalArgumentException("Number of banknotes must be positive");
+            throw new IllegalArgumentException("Number of banknotes must be positive. Requested " + number);
         }
         if (number > count) {
             return false;
