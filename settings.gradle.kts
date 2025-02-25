@@ -7,9 +7,15 @@ include("hw03-generics")
 include("hw06-annotations")
 include("hw08-gc")
 include("hw10-byteCodes")
+include("hw12-solid")
 
 // Plugin management for centralized version control of plugins
 pluginManagement {
+    repositories {
+        gradlePluginPortal() // Adding the Gradle Plugin Portal to load plugins
+        mavenCentral() // Additionally, Maven Central
+    }
+
     val jgitver: String by settings
     val dependencyManagement: String by settings
     val springframeworkBoot: String by settings
