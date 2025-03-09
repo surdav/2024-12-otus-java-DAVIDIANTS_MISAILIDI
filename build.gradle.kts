@@ -23,9 +23,13 @@ allprojects {
         mavenCentral()
     }
 
+        val jmh: String by project
+    val asm: String by project
     val testcontainersBom: String by project
     val protobufBom: String by project
     val guava: String by project
+    val glassfishJson: String by project
+
 
     // Dependency management for consistent versions
     apply(plugin = "io.spring.dependency-management")
@@ -37,6 +41,11 @@ allprojects {
                 mavenBom("com.google.protobuf:protobuf-bom:$protobufBom")
             }
             dependency("com.google.guava:guava:$guava")
+            dependency("org.openjdk.jmh:jmh-generator-annprocess:$jmh")
+            dependency("org.glassfish:jakarta.json:$glassfishJson")
+            dependency("org.ow2.asm:asm-commons:$asm")
+            dependency("com.google.guava:guava:$guava")
+            dependency("org.glassfish:jakarta.json:$glassfishJson")
         }
     }
 }
@@ -61,6 +70,10 @@ subprojects {
         // Main dependencies
         add("implementation", "ch.qos.logback:logback-classic:$logbackVersion")
         add("implementation", "com.google.guava:guava:$guava")
+
+        add("implementation", "com.fasterxml.jackson.core:jackson-databind")
+        add("implementation", "org.glassfish:jakarta.json")
+        add("implementation", "com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
         // Test dependencies (explicitly declare test framework + runtime engine)
         add("testImplementation", platform("org.junit:junit-bom:$junitVersion"))
