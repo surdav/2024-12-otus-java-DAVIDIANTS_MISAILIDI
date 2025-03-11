@@ -1,12 +1,11 @@
 package ru.otus.dataprocessor;
 
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.otus.model.Measurement;
+
+import java.io.InputStream;
+import java.util.List;
 
 public class ResourcesFileLoader implements Loader {
 
@@ -19,9 +18,8 @@ public class ResourcesFileLoader implements Loader {
     @Override
     public List<Measurement> load() {
         // читает файл, парсит и возвращает результат
-        try {
             ObjectMapper mapper = new ObjectMapper();
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
 
             if(inputStream == null) {
                 throw new FileProcessException("File not found: " + fileName);
