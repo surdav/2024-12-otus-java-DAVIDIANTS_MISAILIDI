@@ -9,6 +9,7 @@ include("hw08-gc")
 include("hw10-byteCodes")
 include("hw12-solid")
 include("hw15-structuralPatterns")
+include("hw16-io")
 
 // Plugin management for centralized version control of plugins
 pluginManagement {
