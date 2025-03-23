@@ -3,6 +3,8 @@ package ru.otus.jdbc.mapper;
 import java.lang.reflect.Field;
 import java.util.stream.Collectors;
 
+import org.intellij.lang.annotations.Language;
+
 public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
 
     private final EntityClassMetaData<?> entityClassMetaData;
@@ -17,6 +19,7 @@ public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
     }
 
     @Override
+    @Language("SQL")
     public String getSelectByIdSql() {
         return String.format("SELECT * FROM %s WHERE %s = ?",
                 entityClassMetaData.getName().toLowerCase(),
@@ -41,6 +44,7 @@ public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
     }
 
     @Override
+    @Language("SQL")
     public String getUpdateSql() {
         String updates = entityClassMetaData.getFieldsWithoutId().stream()
                 .map(field -> field.getName() + " = ?")

@@ -1,17 +1,17 @@
 package ru.otus.jdbc.mapper;
 
-import java.sql.Connection;
-import java.util.List;
-import java.util.Optional;
 import ru.otus.core.repository.DataTemplate;
 import ru.otus.core.repository.executor.DbExecutor;
-
-import ru.otus.core.repository.DataTemplate;
-import ru.otus.core.repository.executor.DbExecutor;
+import ru.otus.jdbc.exception.OrmMappingException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /** Сохратяет объект в базу, читает объект из базы */
 @SuppressWarnings("java:S1068")
@@ -99,22 +99,49 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
 
     private Object getFieldValue(Field field, T object) {
         try {
-            field.setAccessible(true);
-            return field.get(object);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Error getting value for field: " + field.getName(), e);
+            // Преобразуем имя поля в имя геттера (например, "name" -> "getName")
+            String getterName = "get" + capitalizeFirstLetter(field.getName());
+
+            // Ищем метод с именем геттера
+            Method getter = object.getClass().getMethod(getterName);
+
+            // Вызываем найденный геттер у объекта
+            return getter.invoke(object);
+        } catch (Exception e) {
+            throw new UnsupportedOperationException("Error getting value for field: " + field.getName(), e);
         }
     }
 
-    private T createObjectFromResultSet(ResultSet rs) throws Exception {
-
-        T instance = entityClassMetaData.getConstructor().newInstance();
-
-        for (Field field : entityClassMetaData.getAllFields()) {
-            field.setAccessible(true);
-            field.set(instance, rs.getObject(field.getName()));
+    private String capitalizeFirstLetter(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
         }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
 
-        return instance;
+    private T createObjectFromResultSet(ResultSet rs) throws OrmMappingException {
+        try {
+            // Создаем новый экземпляр объекта через рефлексию
+            T instance = entityClassMetaData.getConstructor().newInstance();
+
+            // Устанавливаем значения всех полей объекта, используя сеттеры
+            for (Field field : entityClassMetaData.getAllFields()) {
+                // Получаем имя поля и создаем имя сеттера
+                String setterName = "set" + capitalizeFirstLetter(field.getName());
+
+                // Проверяем наличие метода сеттера
+                Method setter = instance.getClass().getMethod(setterName, field.getType());
+
+                // Получаем значение соответствующего поля из ResultSet
+                Object value = rs.getObject(field.getName(), field.getType());
+
+                // Вызываем сеттер с извлеченным значением
+                setter.invoke(instance, value);
+            }
+
+            return instance;
+        } catch (SQLException | ReflectiveOperationException e) {
+            throw new OrmMappingException("Error while mapping ResultSet to the object", e);
+        }
     }
 }

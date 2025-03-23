@@ -68,6 +68,7 @@ subprojects {
         val guava: String by project
 
         // Main dependencies
+        add("implementation", "org.jetbrains:annotations:26.0.2")
         add("implementation", "org.flywaydb:flyway-core")
         add("implementation", "com.zaxxer:HikariCP")
         add("implementation", "org.postgresql:postgresql")

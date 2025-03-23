@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.intellij.lang.annotations.Language;
+
 public class DbExecutorImpl implements DbExecutor {
 
     @Override
-    public long executeStatement(Connection connection, String sql, List<Object> params) {
+    public long executeStatement(Connection connection, @Language("SQL") String sql, List<Object> params) {
 
         try (var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -38,7 +40,7 @@ public class DbExecutorImpl implements DbExecutor {
 
     @Override
     public <T> Optional<T> executeSelect(
-            Connection connection, String sql, List<Object> params, Function<ResultSet, T> rsHandler) {
+            Connection connection, @Language("SQL") String sql, List<Object> params, Function<ResultSet, T> rsHandler) {
         try (var pst = connection.prepareStatement(sql)) {
             for (var idx = 0; idx < params.size(); idx++) {
                 pst.setObject(idx + 1, params.get(idx));

@@ -2,9 +2,7 @@ package ru.otus.crm.model;
 
 public class Client {
     private Long id;
-    private String name;
-
-    public Client() {}
+    private final String name;
 
     public Client(String name) {
         this.id = null;
@@ -26,10 +24,6 @@ public class Client {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
