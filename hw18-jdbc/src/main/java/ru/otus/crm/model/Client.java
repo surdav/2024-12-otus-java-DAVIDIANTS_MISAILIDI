@@ -1,11 +1,15 @@
 package ru.otus.crm.model;
 
+import ru.otus.annotation.Id;
+
 public class Client {
+    @Id
     private Long id;
-    private final String name;
+    private String name;
+
+    public Client() {}
 
     public Client(String name) {
-        this.id = null;
         this.name = name;
     }
 
@@ -24,6 +28,10 @@ public class Client {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

@@ -4,6 +4,7 @@ import ru.otus.core.repository.DataTemplate;
 import ru.otus.core.repository.DataTemplateException;
 import ru.otus.core.repository.executor.DbExecutor;
 import ru.otus.crm.model.Client;
+import ru.otus.crm.model.Manager;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -59,6 +60,19 @@ public class ClientDataTemplateJdbc implements DataTemplate<Client> {
         } catch (Exception e) {
             throw new DataTemplateException(e);
         }
+    }
+
+    @Override
+    public long insert(Connection connection, Manager manager) {
+        // SQL для вставки менеджера
+        String sql = "INSERT INTO manager(label, param1) VALUES (?, ?) RETURNING no";
+
+        // Передаём данные label и param1, без no
+        long no = dbExecutor.executeStatement(connection, sql, List.of(manager.getLabel(), manager.getParam1()));
+
+        // Устанавливаем сгенерированный no менеджеру
+        manager.setNo(no);
+        return no;
     }
 
     @Override

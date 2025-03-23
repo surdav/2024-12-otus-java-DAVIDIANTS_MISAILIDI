@@ -1,5 +1,7 @@
 package ru.otus.core.repository.executor;
 
+import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 import ru.otus.core.sessionmanager.DataBaseOperationException;
 
 import java.sql.Connection;
@@ -10,37 +12,35 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.intellij.lang.annotations.Language;
-
 public class DbExecutorImpl implements DbExecutor {
 
     @Override
-    public long executeStatement(Connection connection, @Language("SQL") String sql, List<Object> params) {
-
+    public long executeStatement(Connection connection, String sql, List<Object> params) {
         try (var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            for (int i = 0; i < params.size(); i++) {
-                preparedStatement.setObject(i + 1, params.get(i));
+            // Подставляем параметры в запрос
+            for (int idx = 0; idx < params.size(); idx++) {
+                preparedStatement.setObject(idx + 1, params.get(idx));
             }
 
+            // Выполняем запрос
             preparedStatement.executeUpdate();
 
-            try (var rs = preparedStatement.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getLong(1); // Возвращает сгенерированный ID
+            // Получаем сгенерированные ключи
+            try (var generatedKeys = preparedStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getLong(1); // Возвращаем сгенерированный ключ
+                } else {
+                    throw new DataBaseOperationException("No generated key returned from database", null);
                 }
             }
-
-            throw new DataBaseOperationException("No generated keys found", null    );
-
         } catch (SQLException e) {
-            throw new DataBaseOperationException("executeInsert error", e);
+            throw new DataBaseOperationException("Failed to execute statement: " + sql, e);
         }
     }
 
     @Override
     public <T> Optional<T> executeSelect(
-            Connection connection, @Language("SQL") String sql, List<Object> params, Function<ResultSet, T> rsHandler) {
+            Connection connection, @Language("SQL") String sql, @NotNull List<Object> params, Function<ResultSet, T> rsHandler) {
         try (var pst = connection.prepareStatement(sql)) {
             for (var idx = 0; idx < params.size(); idx++) {
                 pst.setObject(idx + 1, params.get(idx));

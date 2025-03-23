@@ -3,8 +3,6 @@ package ru.otus.jdbc.mapper;
 import java.lang.reflect.Field;
 import java.util.stream.Collectors;
 
-import org.intellij.lang.annotations.Language;
-
 public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
 
     private final EntityClassMetaData<?> entityClassMetaData;
@@ -19,38 +17,40 @@ public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
     }
 
     @Override
-    @Language("SQL")
     public String getSelectByIdSql() {
-        return String.format("SELECT * FROM %s WHERE %s = ?",
+        return String.format(
+                "SELECT * FROM %s WHERE %s = ?",
                 entityClassMetaData.getName().toLowerCase(),
-                entityClassMetaData.getIdField().getName());
+                entityClassMetaData.getIdField().getName()
+        );
     }
 
     @Override
     public String getInsertSql() {
-        // Collect field names without id
-        String fieldNames = entityClassMetaData.getFieldsWithoutId().stream()
+        var fields = entityClassMetaData.getFieldsWithoutId().stream()
                 .map(Field::getName)
                 .collect(Collectors.joining(", "));
-
-        // Create placeholders (?, ?) for future parameters
-        String fieldValues = entityClassMetaData.getFieldsWithoutId().stream()
-                .map(field -> "?")
+        var placeholders = entityClassMetaData.getFieldsWithoutId().stream()
+                .map(f -> "?")
                 .collect(Collectors.joining(", "));
-
-        // Build the final SQL query
-        return String.format("INSERT INTO %s (%s) VALUES (%s)",
-                entityClassMetaData.getName().toLowerCase(), fieldNames, fieldValues);
+        return String.format(
+                "INSERT INTO %s (%s) VALUES (%s)",
+                entityClassMetaData.getName().toLowerCase(),
+                fields,
+                placeholders
+        );
     }
 
     @Override
-    @Language("SQL")
     public String getUpdateSql() {
-        String updates = entityClassMetaData.getFieldsWithoutId().stream()
+        var fields = entityClassMetaData.getFieldsWithoutId().stream()
                 .map(field -> field.getName() + " = ?")
                 .collect(Collectors.joining(", "));
-
-        return String.format("UPDATE %s SET %s WHERE %s = ?",
-                entityClassMetaData.getName().toLowerCase(), updates, entityClassMetaData.getIdField().getName());
+        return String.format(
+                "UPDATE %s SET %s WHERE %s = ?",
+                entityClassMetaData.getName().toLowerCase(),
+                fields,
+                entityClassMetaData.getIdField().getName()
+        );
     }
 }

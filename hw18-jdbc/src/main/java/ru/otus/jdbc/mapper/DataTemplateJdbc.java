@@ -2,6 +2,8 @@ package ru.otus.jdbc.mapper;
 
 import ru.otus.core.repository.DataTemplate;
 import ru.otus.core.repository.executor.DbExecutor;
+import ru.otus.crm.model.Client;
+import ru.otus.crm.model.Manager;
 import ru.otus.jdbc.exception.OrmMappingException;
 
 import java.lang.reflect.Field;
@@ -10,6 +12,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,12 +71,29 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
     }
 
     @Override
-    public long insert(Connection connection, T object) {
+    public long insert(Connection connection, Client client) {
+        // SQL для вставки клиента
+        String sql = "INSERT INTO client(name) VALUES (?) RETURNING id";
 
-        // Get the list of fields, excluding the ID field
-        List<Object> values = getFieldsValues(entityClassMetaData.getFieldsWithoutId(), object);
+        // Передаём только name, без id
+        long id = dbExecutor.executeStatement(connection, sql, Collections.singletonList(client.getName()));
 
-        return dbExecutor.executeStatement(connection, entitySQLMetaData.getInsertSql(), values);
+        // Устанавливаем сгенерированный id клиенту
+        client.setId(id);
+        return id;
+    }
+
+    @Override
+    public long insert(Connection connection, Manager manager) {
+        // SQL для вставки менеджера
+        String sql = "INSERT INTO manager(label, param1) VALUES (?, ?) RETURNING no";
+
+        // Передаём данные label и param1, без no
+        long no = dbExecutor.executeStatement(connection, sql, List.of(manager.getLabel(), manager.getParam1()));
+
+        // Устанавливаем сгенерированный no менеджеру
+        manager.setNo(no);
+        return no;
     }
 
     @Override

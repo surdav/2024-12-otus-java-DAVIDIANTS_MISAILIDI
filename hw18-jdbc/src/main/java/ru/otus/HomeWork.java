@@ -11,10 +11,15 @@ import ru.otus.crm.model.Client;
 import ru.otus.crm.model.Manager;
 import ru.otus.crm.service.DbServiceClientImpl;
 import ru.otus.crm.service.DbServiceManagerImpl;
-import ru.otus.jdbc.mapper.*;
+import ru.otus.jdbc.mapper.DataTemplateJdbc;
+import ru.otus.jdbc.mapper.EntityClassMetaData;
+import ru.otus.jdbc.mapper.EntityClassMetaDataImpl;
+import ru.otus.jdbc.mapper.EntitySQLMetaData;
+import ru.otus.jdbc.mapper.EntitySQLMetaDataImpl;
 
 @SuppressWarnings({"java:S125", "java:S1481"})
 public class HomeWork {
+
     private static final String URL = "jdbc:postgresql://localhost:5430/demoDB";
     private static final String USER = "usr";
     private static final String PASSWORD = "pwd";
@@ -22,19 +27,18 @@ public class HomeWork {
     private static final Logger log = LoggerFactory.getLogger(HomeWork.class);
 
     public static void main(String[] args) {
-        log.info("Hello, Otus!");
+        log.info("Starting Otus Homework...");
 
-        // Общая часть
+        // Общая часть: создание DataSource и миграция Flyway
         var dataSource = new DriverManagerDataSource(URL, USER, PASSWORD);
-
         flywayMigrations(dataSource);
 
         var transactionRunner = new TransactionRunnerJdbc(dataSource);
-
         var dbExecutor = new DbExecutorImpl();
 
-        // Используем новый метод для создания dbServiceClient
-        var dbServiceClient = createDbServiceClient(transactionRunner, dbExecutor);
+        // Работа с Client
+        log.info("Working with Client...");
+        DbServiceClientImpl dbServiceClient = createDbServiceClient(transactionRunner, dbExecutor);
 
         dbServiceClient.saveClient(new Client("dbServiceFirst"));
 
@@ -43,63 +47,74 @@ public class HomeWork {
         var clientSecondSelected = dbServiceClient
                 .getClient(clientSecond.getId())
                 .orElseThrow(() -> new RuntimeException("Client not found, id:" + clientSecond.getId()));
+        log.info("clientSecondSelected: {}", clientSecondSelected);
 
-        log.info("clientSecondSelected:{}", clientSecondSelected);
+        dbServiceClient.saveClient(new Client(clientSecondSelected.getId(), "dbServiceSecondUpdated"));
+
+        var clientUpdated = dbServiceClient
+                .getClient(clientSecondSelected.getId())
+                .orElseThrow(() -> new RuntimeException("Client not found, id:" + clientSecondSelected.getId()));
+        log.info("clientUpdated: {}", clientUpdated);
+
+        log.info("All clients:");
+        dbServiceClient.findAll().forEach(client -> log.info("client: {}", client));
 
         // Работа с Manager
-        EntityClassMetaData<Manager> entityClassMetaDataManager = new EntityClassMetaDataImpl<>(Manager.class);
+        log.info("Working with Manager...");
+        DbServiceManagerImpl dbServiceManager = createDbServiceManager(transactionRunner, dbExecutor);
 
-        EntitySQLMetaData entitySQLMetaDataManager = new EntitySQLMetaDataImpl(entityClassMetaDataManager);
+        dbServiceManager.saveManager(new Manager("ManagerFirst", "Param1"));
 
-        var dataTemplateManager = new DataTemplateJdbc<>(dbExecutor, entitySQLMetaDataManager, entityClassMetaDataManager);
-
-        var dbServiceManager = new DbServiceManagerImpl(transactionRunner, dataTemplateManager);
-
-        dbServiceManager.saveManager(new Manager("ManagerFirst"));
-
-        var managerSecond = dbServiceManager.saveManager(new Manager("ManagerSecond"));
+        var managerSecond = dbServiceManager.saveManager(new Manager("ManagerSecond", "Param2"));
 
         var managerSecondSelected = dbServiceManager
                 .getManager(managerSecond.getNo())
-                .orElseThrow(() -> new RuntimeException("Manager not found, id:" + managerSecond.getNo()));
+                .orElseThrow(() -> new RuntimeException("Manager not found, no:" + managerSecond.getNo()));
+        log.info("managerSecondSelected: {}", managerSecondSelected);
 
-        log.info("managerSecondSelected:{}", managerSecondSelected);
+        dbServiceManager.saveManager(new Manager(managerSecondSelected.getNo(), "ManagerSecondUpdated", "ParamUpdated"));
+
+        var managerUpdated = dbServiceManager
+                .getManager(managerSecondSelected.getNo())
+                .orElseThrow(() -> new RuntimeException("Manager not found, no:" + managerSecondSelected.getNo()));
+        log.info("managerUpdated: {}", managerUpdated);
+
+        log.info("All managers:");
+        dbServiceManager.findAll().forEach(manager -> log.info("manager: {}", manager));
+
+        log.info("Otus Homework completed!");
     }
 
     private static void flywayMigrations(DataSource dataSource) {
-        log.info("db migration started...");
+        log.info("Running Flyway migrations...");
 
         var flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations("classpath:/db/migration")
                 .load();
 
-//        flyway.clean(); // Удаляет всю существующую схему
-        flyway.migrate(); // Выполняет SQL-миграции для восстановления базы данных
+        flyway.migrate();
 
-        log.info("db migration finished.");
-        log.info("***********************************");
-        log.info("      DATABASE MIGRATION DONE     ");
-        log.info("***********************************");
-
-        var result = flyway.migrate();
-        log.info("Number of migrations applied: {}", result.migrations.size());
+        log.info("Flyway migrations completed.");
     }
 
-    /**
-     * Метод для создания `DbServiceClientImpl` с настройкой зависимостей.
-     *
-     * @param transactionRunner Объект для управления транзакциями
-     * @param dbExecutor        Реализация DbExecutor
-     * @return Настроенный экземпляр DbServiceClientImpl
-     */
     private static DbServiceClientImpl createDbServiceClient(TransactionRunnerJdbc transactionRunner, DbExecutorImpl dbExecutor) {
         EntityClassMetaData<Client> entityClassMetaDataClient = new EntityClassMetaDataImpl<>(Client.class);
         EntitySQLMetaData entitySQLMetaDataClient = new EntitySQLMetaDataImpl(entityClassMetaDataClient);
 
         var dataTemplateClient = new DataTemplateJdbc<>(
-                dbExecutor, entitySQLMetaDataClient, entityClassMetaDataClient); // Реализация DataTemplate, универсальная
+                dbExecutor, entitySQLMetaDataClient, entityClassMetaDataClient);
 
         return new DbServiceClientImpl(transactionRunner, dataTemplateClient);
+    }
+
+    private static DbServiceManagerImpl createDbServiceManager(TransactionRunnerJdbc transactionRunner, DbExecutorImpl dbExecutor) {
+        EntityClassMetaData<Manager> entityClassMetaDataManager = new EntityClassMetaDataImpl<>(Manager.class);
+        EntitySQLMetaData entitySQLMetaDataManager = new EntitySQLMetaDataImpl(entityClassMetaDataManager);
+
+        var dataTemplateManager = new DataTemplateJdbc<>(
+                dbExecutor, entitySQLMetaDataManager, entityClassMetaDataManager);
+
+        return new DbServiceManagerImpl(transactionRunner, dataTemplateManager);
     }
 }
