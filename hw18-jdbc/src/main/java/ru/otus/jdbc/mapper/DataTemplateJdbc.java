@@ -119,16 +119,21 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
 
     private Object getFieldValue(Field field, T object) {
         try {
-            // Преобразуем имя поля в имя геттера (например, "name" -> "getName")
-            String getterName = "get" + capitalizeFirstLetter(field.getName());
+            String getterName;
+            if (field.getType() == boolean.class || field.getType() == Boolean.class) {
+                // Для boolean используем "is"
+                getterName = "is" + capitalizeFirstLetter(field.getName());
+            } else {
+                // Для остальных типов используем "get"
+                getterName = "get" + capitalizeFirstLetter(field.getName());
+            }
 
-            // Ищем метод с именем геттера
             Method getter = object.getClass().getMethod(getterName);
-
-            // Вызываем найденный геттер у объекта
             return getter.invoke(object);
         } catch (Exception e) {
-            throw new UnsupportedOperationException("Error getting value for field: " + field.getName(), e);
+            throw new UnsupportedOperationException(
+                    "Error getting value for field: " + field.getName(), e
+            );
         }
     }
 
@@ -141,22 +146,17 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
 
     private T createObjectFromResultSet(ResultSet rs) throws OrmMappingException {
         try {
-            // Создаем новый экземпляр объекта через рефлексию
             T instance = entityClassMetaData.getConstructor().newInstance();
 
-            // Устанавливаем значения всех полей объекта, используя сеттеры
+            // Устанавливаем значения полей
             for (Field field : entityClassMetaData.getAllFields()) {
-                // Получаем имя поля и создаем имя сеттера
-                String setterName = "set" + capitalizeFirstLetter(field.getName());
+                field.setAccessible(true); // Даем доступ к private/protected полю
 
-                // Проверяем наличие метода сеттера
-                Method setter = instance.getClass().getMethod(setterName, field.getType());
-
-                // Получаем значение соответствующего поля из ResultSet
+                // Получаем значение поля из ResultSet
                 Object value = rs.getObject(field.getName(), field.getType());
 
-                // Вызываем сеттер с извлеченным значением
-                setter.invoke(instance, value);
+                // Устанавливаем значение в объект через Field API
+                field.set(instance, value);
             }
 
             return instance;
