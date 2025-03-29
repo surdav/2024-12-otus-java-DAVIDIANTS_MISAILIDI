@@ -10,6 +10,7 @@ include("hw10-byteCodes")
 include("hw12-solid")
 include("hw15-structuralPatterns")
 include("hw16-io")
+include("hw18-jdbc")
 
 // Plugin management for centralized version control of plugins
 pluginManagement {

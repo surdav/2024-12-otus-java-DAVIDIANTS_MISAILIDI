@@ -68,6 +68,13 @@ subprojects {
         val guava: String by project
 
         // Main dependencies
+        add("implementation", "org.jetbrains:annotations:26.0.2")
+        add("implementation", "org.flywaydb:flyway-core")
+        add("implementation", "com.zaxxer:HikariCP")
+        add("implementation", "org.postgresql:postgresql")
+
+        add("runtimeOnly", "org.flywaydb:flyway-database-postgresql")
+
         add("implementation", "ch.qos.logback:logback-classic:$logbackVersion")
         add("implementation", "com.google.guava:guava:$guava")
 
@@ -76,6 +83,11 @@ subprojects {
         add("implementation", "com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
         // Test dependencies (explicitly declare test framework + runtime engine)
+        add("testImplementation", platform("org.junit:junit-bom:$junitVersion"))
+        add("testImplementation", "org.junit.jupiter:junit-jupiter-params")
+        add("testImplementation", "org.testcontainers:junit-jupiter")
+        add("testImplementation", "org.testcontainers:postgresql")
+
         add("testImplementation", platform("org.junit:junit-bom:$junitVersion"))
         add("testImplementation", "org.junit.jupiter:junit-jupiter-api")
         add("testImplementation", "org.assertj:assertj-core:$assertjVersion")
