@@ -55,16 +55,20 @@ public class Client implements Cloneable {
     public Client(Long id, String name, Address address, List<Phone> phones) {
         this.id = id;
         this.name = name;
-        this.address = address;
+
+        // Creating a copy of the address object
         if (address != null) {
-            address.setClient(this);
+            this.address = new Address(address.getId(), address.getStreet());
+            this.address.setClient(this);
         }
 
         this.phones = new ArrayList<>();
         if (phones != null) {
             for (Phone phone : phones) {
-                phone.setClient(this);
-                this.phones.add(phone);
+                // Creating a copy of each Phone object
+                Phone newPhone = new Phone(phone.getId(), phone.getNumber());
+                newPhone.setClient(this);
+                this.phones.add(newPhone);
             }
         }
     }
